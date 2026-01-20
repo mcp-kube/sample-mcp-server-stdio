@@ -26,6 +26,12 @@ A Model Context Protocol (MCP) server implementation using **stdio (standard inp
    - Input: `value` (number), `from_unit` (celsius/fahrenheit/kelvin), `to_unit` (celsius/fahrenheit/kelvin)
    - Output: Converted temperature value
 
+## Requirements
+
+- Go 1.23 or later
+- Docker (for containerization)
+- Kubernetes cluster (for deployment)
+
 ## Transport: Stdio
 
 This server uses **stdio transport**, which communicates through standard input and output streams. This is ideal for:
@@ -272,18 +278,24 @@ async with stdio_client(server_params) as (read, write):
 
 ## Docker Deployment
 
-### Build the Docker Image
+### Build and Push Docker Image
 
 ```bash
-docker build -t sample-mcp-server-stdio:latest .
+# Build for linux/amd64 architecture
+docker build -t aliok/sample-mcp-server-stdio:latest .
+
+# Push to Docker Hub (or your registry)
+docker push aliok/sample-mcp-server-stdio:latest
 ```
+
+**Note**: Replace `aliok` with your Docker Hub username or registry path. The Dockerfile is configured to build for linux/amd64 architecture.
 
 ### Run with Docker
 
 Since stdio requires interactive terminal access:
 
 ```bash
-docker run -i sample-mcp-server-stdio:latest
+docker run -i aliok/sample-mcp-server-stdio:latest
 ```
 
 Note: Stdio servers in Docker are primarily useful for:
@@ -295,20 +307,43 @@ For typical MCP server deployments, consider HTTP-based transports (SSE or Strea
 
 ## Kubernetes Deployment
 
-While stdio transport can run in Kubernetes, it's less common than HTTP-based transports. The provided manifests are included for completeness:
+While stdio transport can run in Kubernetes, it's less common than HTTP-based transports. The provided manifests demonstrate how to deploy stdio servers in K8s:
+
+### Deploy to Kubernetes
 
 ```bash
-# Deploy to Kubernetes
-kubectl apply -k k8s/
-
-# Check deployment status
-kubectl get pods -l app=sample-mcp-server-stdio
-
-# Note: Accessing stdio servers in K8s requires kubectl exec or similar
-kubectl exec -it deployment/sample-mcp-server-stdio -- /bin/sh
+# Apply manifests
+kubectl apply -f k8s/
 ```
 
-For production Kubernetes deployments, consider using the SSE or Streamable HTTP variants instead.
+**Note**: The deployment uses `aliok/sample-mcp-server-stdio:latest`. Update `k8s/deployment.yaml` if using a different registry.
+
+### Verify Deployment
+
+```bash
+# Check deployment status
+kubectl get deployment sample-mcp-server-stdio
+
+# Check pods
+kubectl get pods -l app=sample-mcp-server-stdio
+
+# View logs
+kubectl logs -l app=sample-mcp-server-stdio
+```
+
+### Access the Server
+
+Since stdio servers communicate through stdin/stdout, you can interact with them using `kubectl exec`:
+
+```bash
+# Access the server interactively
+kubectl exec -it deployment/sample-mcp-server-stdio -- /bin/sh
+
+# Or pipe commands directly
+echo '{"jsonrpc":"2.0","method":"initialize","params":{}}' | kubectl exec -i deployment/sample-mcp-server-stdio -- ./mcp-server-stdio
+```
+
+**Note**: For production Kubernetes deployments, consider using the SSE or Streamable HTTP variants which provide better HTTP-based access patterns.
 
 ## Development
 

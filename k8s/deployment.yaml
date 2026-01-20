@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: mcp-server
-        image: sample-mcp-server-stdio:latest
-        imagePullPolicy: IfNotPresent
+        image: aliok/sample-mcp-server-stdio:latest
+        imagePullPolicy: Always
         stdin: true
         tty: true
         resources:
