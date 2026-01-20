@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-mcp-server-stdio
+  labels:
+    app: sample-mcp-server-stdio
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: stdio
+    protocol: TCP
+    name: stdio
+  selector:
+    app: sample-mcp-server-stdio

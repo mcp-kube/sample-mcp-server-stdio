@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-mcp-server-stdio
+  labels:
+    app: sample-mcp-server-stdio
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample-mcp-server-stdio
+  template:
+    metadata:
+      labels:
+        app: sample-mcp-server-stdio
+    spec:
+      containers:
+      - name: mcp-server
+        image: sample-mcp-server-stdio:latest
+        imagePullPolicy: IfNotPresent
+        stdin: true
+        tty: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
